@@ -1,0 +1,23 @@
+services:
+  danger-zone-audit:
+    build: .
+    image: danger-zone-audit:1.0.0
+    container_name: danger-zone-audit
+    ports:
+      - "8000:8000"
+    environment:
+      # SQLite 文件位于卷内，重启/重建容器后记录仍可查询
+      DZ_DB_PATH: /data/danger_zones.db
+      DZ_MERGE_EPSILON: "1e-9"
+      DZ_GEOM_EPSILON: "1e-7"
+    volumes:
+      - danger-zone-data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  danger-zone-data:
